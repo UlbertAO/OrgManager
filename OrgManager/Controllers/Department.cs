@@ -1,4 +1,4 @@
-﻿namespace OrgManager.Controllers.v2
+﻿namespace OrgManager.Controllers
 {
     public class Department
     {

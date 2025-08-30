@@ -1,9 +1,12 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using Asp.Versioning;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
 namespace OrgManager.Controllers.v2
 {
-    [Route("api/v2/[controller]")]
+    [ApiVersion("2.0")]
+    //[Route("api/v{version:apiVersion}/[controller]")] // use this only when using UrlSegmentApiVersionReader in ApiVersionReader, need to setup swagger to show version selector dropdown
+    [Route("api/[controller]")]
     [ApiController]
     public class DepartmentController : ControllerBase
     {
