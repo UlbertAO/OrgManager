@@ -1,5 +1,6 @@
 using Asp.Versioning;
 using Asp.Versioning.ApiExplorer;
+using Microsoft.EntityFrameworkCore;
 using OrgManager;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -13,11 +14,11 @@ var apiVersioningBuilder = builder.Services.AddApiVersioning(options =>
     options.AssumeDefaultVersionWhenUnspecified = true;
     options.DefaultApiVersion = new ApiVersion(1, 0);
     options.ReportApiVersions = true;
-    
+
     options.ApiVersionReader = ApiVersionReader.Combine(
         new HeaderApiVersionReader("x-version") // header versioning 
-        //new QueryStringApiVersionReader("x-version") // query versioning 
-        //new UrlSegmentApiVersionReader()            // URL versioning 
+                                                //new QueryStringApiVersionReader("x-version") // query versioning 
+                                                //new UrlSegmentApiVersionReader()            // URL versioning 
      );
 });
 
@@ -33,6 +34,10 @@ builder.Services.AddSwaggerGen();
 
 builder.Services.ConfigureOptions<ConfigureSwaggerOptions>();
 
+builder.Services.AddDbContext<OrgDbContext>(options =>
+{
+    options.UseNpgsql(builder.Configuration.GetConnectionString("OrgManagerDbConnection"));
+});
 
 var app = builder.Build();
 
@@ -40,7 +45,7 @@ var app = builder.Build();
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
-    
+
     var versionDescriptionProvider = app.Services.GetRequiredService<IApiVersionDescriptionProvider>();
     app.UseSwaggerUI(options =>
     {

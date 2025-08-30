@@ -1,6 +1,7 @@
 ﻿using Asp.Versioning;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace OrgManager.Controllers.v1
 {
@@ -13,16 +14,28 @@ namespace OrgManager.Controllers.v1
         private static readonly string[] Departments = new[]
         { "Engineering", "Data Science", "Human Resource"};
         private readonly ILogger<DepartmentController> _logger;
+        private readonly OrgDbContext orgDbContext;
 
-        public DepartmentController(ILogger<DepartmentController> logger)
+        public DepartmentController(ILogger<DepartmentController> logger, OrgDbContext orgDbContext)
         {
             _logger = logger;
+            this.orgDbContext = orgDbContext;
+
         }
 
         [HttpGet]
         public IActionResult Get()
         {
             return Ok(Departments);
+        }
+        [HttpGet("dttm")]
+        public IActionResult GetDttm()
+        {
+            var dttm = orgDbContext.Database
+                .SqlQueryRaw<DateTime>("SELECT NOW()")
+                .AsEnumerable()
+                .FirstOrDefault();
+            return Ok(dttm);
         }
     }
 }
