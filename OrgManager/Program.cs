@@ -1,4 +1,6 @@
 using Asp.Versioning;
+using Asp.Versioning.ApiExplorer;
+using OrgManager;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -29,13 +31,25 @@ apiVersioningBuilder.AddApiExplorer(options =>
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
+builder.Services.ConfigureOptions<ConfigureSwaggerOptions>();
+
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
-    app.UseSwaggerUI();
+    
+    var versionDescriptionProvider = app.Services.GetRequiredService<IApiVersionDescriptionProvider>();
+    app.UseSwaggerUI(options =>
+    {
+        foreach (var description in versionDescriptionProvider.ApiVersionDescriptions)
+        {
+            options.SwaggerEndpoint($"/swagger/{description.GroupName}/swagger.json", description.GroupName.ToUpperInvariant());
+
+        }
+    });
 }
 
 app.UseHttpsRedirection();
