@@ -23,29 +23,18 @@ namespace OrgManager.Controllers.v1
             this.orgDbContext = orgDbContext;
 
         }
-
-        [HttpGet("dttm")]
-        public IActionResult GetDttm()
-        {
-            var dttm = orgDbContext.Database
-                .SqlQueryRaw<DateTime>("SELECT NOW()")
-                .AsEnumerable()
-                .FirstOrDefault();
-            return Ok(dttm);
-        }
-
         [HttpGet]
-        public IActionResult GetAll()
+        public async Task<IActionResult> GetAll()
         {
-            var departments = orgDbContext.Departments.ToList();
+            var departments = await orgDbContext.Departments.ToListAsync();
             return Ok(departments);
         }
 
         [HttpGet("{Id:Guid}")]
-        public IActionResult GetById([FromRoute] Guid Id)
+        public async Task<IActionResult> GetById([FromRoute] Guid Id)
         {
-            var department = orgDbContext.Departments.Find(Id);
-            //var department = orgDbContext.Departments.Where(department => department.Id == Id).FirstOrDefault();
+            var department = await orgDbContext.Departments.FindAsync(Id);
+            //var department = await orgDbContext.Departments.Where(department => department.Id == Id).FirstOrDefaultAsync();
 
             if (department == null)
             {
@@ -55,45 +44,45 @@ namespace OrgManager.Controllers.v1
         }
 
         [HttpPost]
-        public IActionResult Create([FromBody] Department department)
+        public async Task<IActionResult> Create([FromBody] Department department)
         {
             if (department == null)
             {
                 return BadRequest();
             }
-            orgDbContext.Departments.Add(department);
-            orgDbContext.SaveChanges();
+            await orgDbContext.Departments.AddAsync(department);
+            await orgDbContext.SaveChangesAsync();
 
             //return Ok(departmentData);
             return CreatedAtAction(nameof(GetById), new { Id = department.Id }, department);
         }
 
         [HttpPut("{Id:Guid}")]
-        public IActionResult Update([FromRoute] Guid Id, [FromBody] Department department)
+        public async Task<IActionResult> Update([FromRoute] Guid Id, [FromBody] Department department)
         {
-            var departmentData = orgDbContext.Departments.Find(Id);
+            var departmentData = await orgDbContext.Departments.FindAsync(Id);
             if (departmentData == null)
             {
                 return NotFound();
             }
             departmentData.Name = department.Name;
             departmentData.Description = department.Description;
-            orgDbContext.SaveChanges();
+            await orgDbContext.SaveChangesAsync();
 
             return Ok(departmentData);
         }
 
         [HttpDelete("{Id:Guid}")]
-        public IActionResult Delete([FromRoute] Guid Id)
+        public async Task<IActionResult> Delete([FromRoute] Guid Id)
         {
-            var departmentData = orgDbContext.Departments.Find(Id);
+            var departmentData = await orgDbContext.Departments.FindAsync(Id);
             if (departmentData == null)
             {
                 return NotFound();
 
             }
             var departmentDomain = orgDbContext.Departments.Remove(departmentData);
-            orgDbContext.SaveChangesAsync();
+            await orgDbContext.SaveChangesAsync();
 
             return Ok(departmentData);
         }
