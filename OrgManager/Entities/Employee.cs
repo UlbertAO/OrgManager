@@ -1,4 +1,4 @@
-﻿namespace OrgManager.Controllers
+﻿namespace OrgManager.Entities
 {
     public class Employee
     {

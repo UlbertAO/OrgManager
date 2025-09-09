@@ -1,6 +1,6 @@
-﻿namespace OrgManager.Controllers
+﻿namespace OrgManager.DTOs.Department
 {
-    public class Department
+    public class DepartmentGetByIdResponse
     {
         public Guid Id { get; set; }
         public string Name { get; set; }

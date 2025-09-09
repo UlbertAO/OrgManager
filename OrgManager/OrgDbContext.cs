@@ -1,5 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using OrgManager.Controllers;
+using OrgManager.Entities;
 using System;
 
 namespace OrgManager

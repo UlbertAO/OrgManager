@@ -1,8 +1,8 @@
 ﻿using Asp.Versioning;
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using OrgManager.DTOs.Department;
+using OrgManager.Entities;
 
 namespace OrgManager.Controllers.v1
 {
@@ -27,7 +27,20 @@ namespace OrgManager.Controllers.v1
         public async Task<IActionResult> GetAll()
         {
             var departments = await orgDbContext.Departments.ToListAsync();
-            return Ok(departments);
+
+            var departmentsDto = departments.Select(department => new DepartmentGetAllResponse { Name = department.Name, Description = department.Description });
+
+            //var departmentsDto = new List<DepartmentGetAllResponse>();
+            //foreach (var department in departments)
+            //{
+            //    departmentsDto.Add(new DepartmentGetAllResponse
+            //    {
+            //        Name = department.Name,
+            //        Description = department.Description
+            //    });
+            //}
+
+            return Ok(departmentsDto);
         }
 
         [HttpGet("{Id:Guid}")]
@@ -40,51 +53,85 @@ namespace OrgManager.Controllers.v1
             {
                 return NotFound();
             }
-            return Ok(department);
+            var departmentDto = new DepartmentGetByIdResponse
+            {
+                Id = department.Id,
+                Name = department.Name,
+                Description = department.Description
+            };
+            return Ok(departmentDto);
         }
 
         [HttpPost]
-        public async Task<IActionResult> Create([FromBody] Department department)
+        public async Task<IActionResult> Create([FromBody] DepartmentCreateRequest departmentDto)
         {
-            if (department == null)
+            if (departmentDto == null)
             {
                 return BadRequest();
             }
+
+            var department = new Department
+            {
+                Name = departmentDto.Name,
+                Description = departmentDto.Description
+            };
+
             await orgDbContext.Departments.AddAsync(department);
             await orgDbContext.SaveChangesAsync();
 
+            var departmentResponseDto = new DepartmentGetByIdResponse
+            {
+                Id = department.Id,
+                Name = department.Name,
+                Description = department.Description
+            };
+
             //return Ok(departmentData);
-            return CreatedAtAction(nameof(GetById), new { Id = department.Id }, department);
+            return CreatedAtAction(nameof(GetById), new { Id = department.Id }, departmentResponseDto);
         }
 
         [HttpPut("{Id:Guid}")]
-        public async Task<IActionResult> Update([FromRoute] Guid Id, [FromBody] Department department)
+        public async Task<IActionResult> Update([FromRoute] Guid Id, [FromBody] DepartmentUpdateRequest departmentDto)
         {
-            var departmentData = await orgDbContext.Departments.FindAsync(Id);
-            if (departmentData == null)
+            var department = await orgDbContext.Departments.FindAsync(Id);
+            if (department == null)
             {
                 return NotFound();
             }
-            departmentData.Name = department.Name;
-            departmentData.Description = department.Description;
+            department.Description = departmentDto.Description;
+
             await orgDbContext.SaveChangesAsync();
 
-            return Ok(departmentData);
+            var departmentResponseDto = new DepartmentGetByIdResponse
+            {
+                Id = department.Id,
+                Name = department.Name,
+                Description = department.Description
+            };
+
+            return Ok(departmentResponseDto);
         }
 
         [HttpDelete("{Id:Guid}")]
         public async Task<IActionResult> Delete([FromRoute] Guid Id)
         {
-            var departmentData = await orgDbContext.Departments.FindAsync(Id);
-            if (departmentData == null)
+            var department = await orgDbContext.Departments.FindAsync(Id);
+            if (department == null)
             {
                 return NotFound();
 
             }
-            var departmentDomain = orgDbContext.Departments.Remove(departmentData);
+            var departmentDomain = orgDbContext.Departments.Remove(department);
             await orgDbContext.SaveChangesAsync();
 
-            return Ok(departmentData);
+            var departmentResponseDto = new DepartmentGetByIdResponse
+            {
+                Id = department.Id,
+                Name = department.Name,
+                Description = department.Description
+            };
+
+            return Ok(department);
         }
     }
 }
