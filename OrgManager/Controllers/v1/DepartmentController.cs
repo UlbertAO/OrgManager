@@ -1,4 +1,5 @@
 ﻿using Asp.Versioning;
+using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using OrgManager.DTOs.Department;
@@ -12,33 +13,22 @@ namespace OrgManager.Controllers.v1
     [ApiController]
     public class DepartmentController : ControllerBase
     {
-        private static readonly string[] Departments = new[]
-        { "Engineering", "Data Science", "Human Resource"};
         private readonly ILogger<DepartmentController> _logger;
         private readonly OrgDbContext orgDbContext;
+        private readonly IMapper mapper;
 
-        public DepartmentController(ILogger<DepartmentController> logger, OrgDbContext orgDbContext)
+        public DepartmentController(ILogger<DepartmentController> logger, OrgDbContext orgDbContext, IMapper mapper)
         {
             _logger = logger;
             this.orgDbContext = orgDbContext;
-
+            this.mapper = mapper;
         }
         [HttpGet]
         public async Task<IActionResult> GetAll()
         {
             var departments = await orgDbContext.Departments.ToListAsync();
 
-            var departmentsDto = departments.Select(department => new DepartmentGetAllResponse { Name = department.Name, Description = department.Description });
-
-            //var departmentsDto = new List<DepartmentGetAllResponse>();
-            //foreach (var department in departments)
-            //{
-            //    departmentsDto.Add(new DepartmentGetAllResponse
-            //    {
-            //        Name = department.Name,
-            //        Description = department.Description
-            //    });
-            //}
+            var departmentsDto = mapper.Map<List<DepartmentGetAllResponse>>(departments);
 
             return Ok(departmentsDto);
         }
@@ -53,12 +43,8 @@ namespace OrgManager.Controllers.v1
             {
                 return NotFound();
             }
-            var departmentDto = new DepartmentGetByIdResponse
-            {
-                Id = department.Id,
-                Name = department.Name,
-                Description = department.Description
-            };
+            var departmentDto = mapper.Map<DepartmentGetByIdResponse>(department); 
+
             return Ok(departmentDto);
         }
 
@@ -69,24 +55,14 @@ namespace OrgManager.Controllers.v1
             {
                 return BadRequest();
             }
-
-            var department = new Department
-            {
-                Name = departmentDto.Name,
-                Description = departmentDto.Description
-            };
+           
+            var department = mapper.Map<Department>(departmentDto);
 
             await orgDbContext.Departments.AddAsync(department);
             await orgDbContext.SaveChangesAsync();
 
-            var departmentResponseDto = new DepartmentGetByIdResponse
-            {
-                Id = department.Id,
-                Name = department.Name,
-                Description = department.Description
-            };
+            var departmentResponseDto = mapper.Map<DepartmentGetByIdResponse>(department);
 
-            //return Ok(departmentData);
             return CreatedAtAction(nameof(GetById), new { Id = department.Id }, departmentResponseDto);
         }
 
@@ -98,16 +74,12 @@ namespace OrgManager.Controllers.v1
             {
                 return NotFound();
             }
-            department.Description = departmentDto.Description;
+
+            mapper.Map(departmentDto, department);
 
             await orgDbContext.SaveChangesAsync();
 
-            var departmentResponseDto = new DepartmentGetByIdResponse
-            {
-                Id = department.Id,
-                Name = department.Name,
-                Description = department.Description
-            };
+            var departmentResponseDto = mapper.Map<DepartmentGetByIdResponse>(department);
 
             return Ok(departmentResponseDto);
         }
@@ -124,12 +96,7 @@ namespace OrgManager.Controllers.v1
             var departmentDomain = orgDbContext.Departments.Remove(department);
             await orgDbContext.SaveChangesAsync();
 
-            var departmentResponseDto = new DepartmentGetByIdResponse
-            {
-                Id = department.Id,
-                Name = department.Name,
-                Description = department.Description
-            };
+            var departmentResponseDto = mapper.Map<DepartmentGetByIdResponse>(department);
 
             return Ok(department);
         }

@@ -39,6 +39,8 @@ builder.Services.AddDbContext<OrgDbContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("OrgManagerDbConnection"));
 });
 
+builder.Services.AddAutoMapper(typeof(Program));
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
