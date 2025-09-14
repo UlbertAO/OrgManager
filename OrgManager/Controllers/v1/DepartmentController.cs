@@ -2,8 +2,10 @@
 using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using OrgManager.Data.Repositories;
 using OrgManager.DTOs.Department;
 using OrgManager.Entities;
+using OrgManager.Services;
 
 namespace OrgManager.Controllers.v1
 {
@@ -14,90 +16,67 @@ namespace OrgManager.Controllers.v1
     public class DepartmentController : ControllerBase
     {
         private readonly ILogger<DepartmentController> _logger;
-        private readonly OrgDbContext orgDbContext;
-        private readonly IMapper mapper;
+        private readonly DepartmentService departmentService;
 
-        public DepartmentController(ILogger<DepartmentController> logger, OrgDbContext orgDbContext, IMapper mapper)
+        public DepartmentController(ILogger<DepartmentController> logger, DepartmentService departmentService)
         {
             _logger = logger;
-            this.orgDbContext = orgDbContext;
-            this.mapper = mapper;
+            this.departmentService = departmentService;
         }
+
         [HttpGet]
         public async Task<IActionResult> GetAll()
         {
-            var departments = await orgDbContext.Departments.ToListAsync();
+            var departments = await departmentService.GetAllDepartmentsAsync();
 
-            var departmentsDto = mapper.Map<List<DepartmentGetAllResponse>>(departments);
-
-            return Ok(departmentsDto);
+            return Ok(departments);
         }
 
         [HttpGet("{Id:Guid}")]
         public async Task<IActionResult> GetById([FromRoute] Guid Id)
         {
-            var department = await orgDbContext.Departments.FindAsync(Id);
-            //var department = await orgDbContext.Departments.Where(department => department.Id == Id).FirstOrDefaultAsync();
+            var department = await departmentService.GetDepartmentByIdAsync(Id);
 
             if (department == null)
             {
                 return NotFound();
             }
-            var departmentDto = mapper.Map<DepartmentGetByIdResponse>(department); 
-
-            return Ok(departmentDto);
+            return Ok(department);
         }
 
         [HttpPost]
         public async Task<IActionResult> Create([FromBody] DepartmentCreateRequest departmentDto)
         {
+            var department = await departmentService.CreateDepartmentAsync(departmentDto);
+
             if (departmentDto == null)
             {
                 return BadRequest();
             }
-           
-            var department = mapper.Map<Department>(departmentDto);
 
-            await orgDbContext.Departments.AddAsync(department);
-            await orgDbContext.SaveChangesAsync();
-
-            var departmentResponseDto = mapper.Map<DepartmentGetByIdResponse>(department);
-
-            return CreatedAtAction(nameof(GetById), new { Id = department.Id }, departmentResponseDto);
+            return CreatedAtAction(nameof(GetById), new { Id = department.Id }, department);
         }
 
         [HttpPut("{Id:Guid}")]
         public async Task<IActionResult> Update([FromRoute] Guid Id, [FromBody] DepartmentUpdateRequest departmentDto)
         {
-            var department = await orgDbContext.Departments.FindAsync(Id);
+            var department = await departmentService.UpdateDepartmentAsync(Id, departmentDto);
             if (department == null)
             {
                 return NotFound();
             }
 
-            mapper.Map(departmentDto, department);
-
-            await orgDbContext.SaveChangesAsync();
-
-            var departmentResponseDto = mapper.Map<DepartmentGetByIdResponse>(department);
-
-            return Ok(departmentResponseDto);
+            return Ok(department);
         }
 
         [HttpDelete("{Id:Guid}")]
         public async Task<IActionResult> Delete([FromRoute] Guid Id)
         {
-            var department = await orgDbContext.Departments.FindAsync(Id);
+            var department = await departmentService.DeleteDepartmentAsync(Id);
             if (department == null)
             {
                 return NotFound();
-
             }
-            var departmentDomain = orgDbContext.Departments.Remove(department);
-            await orgDbContext.SaveChangesAsync();
-
-            var departmentResponseDto = mapper.Map<DepartmentGetByIdResponse>(department);
-
             return Ok(department);
         }
     }

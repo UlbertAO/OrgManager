@@ -2,6 +2,9 @@ using Asp.Versioning;
 using Asp.Versioning.ApiExplorer;
 using Microsoft.EntityFrameworkCore;
 using OrgManager;
+using OrgManager.Data.Repositories;
+using OrgManager.Data.Repositories.Interfaces;
+using OrgManager.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -40,6 +43,8 @@ builder.Services.AddDbContext<OrgDbContext>(options =>
 });
 
 builder.Services.AddAutoMapper(typeof(Program));
+builder.Services.AddScoped<IDepartmentRepository, DepartmentRepository>();
+builder.Services.AddScoped<DepartmentService>();
 
 var app = builder.Build();
 
