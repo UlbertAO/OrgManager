@@ -1,10 +1,6 @@
 ﻿using Asp.Versioning;
-using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using OrgManager.Data.Repositories;
 using OrgManager.DTOs.Department;
-using OrgManager.Entities;
 using OrgManager.Services;
 
 namespace OrgManager.Controllers.v1
@@ -25,7 +21,7 @@ namespace OrgManager.Controllers.v1
         }
 
         [HttpGet]
-        public async Task<IActionResult> GetAll()
+        public async Task<ActionResult<List<DepartmentGetAllResponse>>> GetAll()
         {
             var departments = await departmentService.GetAllDepartmentsAsync();
 
@@ -33,7 +29,7 @@ namespace OrgManager.Controllers.v1
         }
 
         [HttpGet("{Id:Guid}")]
-        public async Task<IActionResult> GetById([FromRoute] Guid Id)
+        public async Task<ActionResult<DepartmentGetByIdResponse>> GetById([FromRoute] Guid Id)
         {
             var department = await departmentService.GetDepartmentByIdAsync(Id);
 
@@ -45,7 +41,7 @@ namespace OrgManager.Controllers.v1
         }
 
         [HttpPost]
-        public async Task<IActionResult> Create([FromBody] DepartmentCreateRequest departmentDto)
+        public async Task<ActionResult<DepartmentGetByIdResponse>> Create([FromBody] DepartmentCreateRequest departmentDto)
         {
             var department = await departmentService.CreateDepartmentAsync(departmentDto);
 
@@ -58,7 +54,7 @@ namespace OrgManager.Controllers.v1
         }
 
         [HttpPut("{Id:Guid}")]
-        public async Task<IActionResult> Update([FromRoute] Guid Id, [FromBody] DepartmentUpdateRequest departmentDto)
+        public async Task<ActionResult<DepartmentGetByIdResponse>> Update([FromRoute] Guid Id, [FromBody] DepartmentUpdateRequest departmentDto)
         {
             var department = await departmentService.UpdateDepartmentAsync(Id, departmentDto);
             if (department == null)
@@ -70,7 +66,7 @@ namespace OrgManager.Controllers.v1
         }
 
         [HttpDelete("{Id:Guid}")]
-        public async Task<IActionResult> Delete([FromRoute] Guid Id)
+        public async Task<ActionResult<DepartmentGetByIdResponse>> Delete([FromRoute] Guid Id)
         {
             var department = await departmentService.DeleteDepartmentAsync(Id);
             if (department == null)

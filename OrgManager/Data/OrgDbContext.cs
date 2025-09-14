@@ -8,10 +8,10 @@ namespace OrgManager
     {
         public OrgDbContext(DbContextOptions<OrgDbContext> options) : base(options)
         {
-
         }
-        //public DbSet<Employee> Employees { get; set; }
+
         public DbSet<Department> Departments { get; set; }
+        public DbSet<JobTitle> JobTitles { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -42,11 +42,41 @@ namespace OrgManager
             };
 
             modelBuilder.Entity<Department>().HasData(departments);
+            #endregion
 
+            #region seed data for job titles
+            var jobTitles = new List<JobTitle>
+            {
+                new JobTitle
+                {
+                    Id = Guid.Parse("2da23649-4f66-4ec4-8623-e9d009aecbd1"),
+                    Title = "Software Engineer",
+                    Description = "Develops and maintains software applications",
+                    MinSalary = 75000M,
+                    MaxSalary = 150000M,
+                },
+                new JobTitle
+                {
+                    Id = Guid.Parse("4622e91c-8569-43ce-bcb0-3b417cee0d77"),
+                    Title = "Senior Software Engineer",
+                    Description = "Leads software development projects and mentors junior developers",
+                    MinSalary = 100000M,
+                    MaxSalary = 180000M,
+                },
+                new JobTitle
+                {
+                    Id = Guid.Parse("15f7d068-66d9-4b83-a0b9-4f4db8ffd5a2"),
+                    Title = "Technical Lead",
+                    Description = "Provides technical leadership and architecture guidance",
+                    MinSalary = 120000M,
+                    MaxSalary = 200000M,
+                }
+            };
+
+            modelBuilder.Entity<JobTitle>().HasData(jobTitles);
             #endregion
 
             base.OnModelCreating(modelBuilder);
-
         }
     }
 }

@@ -18,13 +18,15 @@ namespace OrgManager.Services
             this.mapper = mapper;
         }
 
-        public async Task<Department?> CreateDepartmentAsync(DepartmentCreateRequest departmentDto)
+        public async Task<DepartmentGetByIdResponse?> CreateDepartmentAsync(DepartmentCreateRequest departmentDto)
         {
             try
             {
                 var department = mapper.Map<Department>(departmentDto);
                 var createdDepartment = await departmentRepository.AddAsync(department);
-                return createdDepartment;
+                var departmentResponseDto = mapper.Map<DepartmentGetByIdResponse>(createdDepartment);
+
+                return departmentResponseDto;
             }
             catch (Exception ex)
             {
