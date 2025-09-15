@@ -44,11 +44,13 @@ builder.Services.AddDbContext<OrgDbContext>(options =>
 
 builder.Services.AddAutoMapper(typeof(Program));
 
-builder.Services.AddScoped<IDepartmentRepository, DepartmentRepository>();
+//builder.Services.AddScoped<IDepartmentRepository, DepartmentRepository>();
 builder.Services.AddScoped<DepartmentService>();
 
-builder.Services.AddScoped<IJobTitleRepository, JobTitleRepository>();
+//builder.Services.AddScoped<IJobTitleRepository, JobTitleRepository>();
 builder.Services.AddScoped<JobTitleService>();
+
+builder.Services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
 
 var app = builder.Build();
 

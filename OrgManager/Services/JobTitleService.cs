@@ -1,4 +1,5 @@
 using AutoMapper;
+using OrgManager.Data.Repositories;
 using OrgManager.Data.Repositories.Interfaces;
 using OrgManager.DTOs.JobTitle;
 using OrgManager.Entities;
@@ -8,10 +9,10 @@ namespace OrgManager.Services
     public class JobTitleService
     {
         private readonly ILogger<JobTitleService> logger;
-        private readonly IJobTitleRepository jobTitleRepository;
+        private readonly IGenericRepository<JobTitle> jobTitleRepository;
         private readonly IMapper mapper;
 
-        public JobTitleService(ILogger<JobTitleService> logger, IJobTitleRepository jobTitleRepository, IMapper mapper)
+        public JobTitleService(ILogger<JobTitleService> logger, IGenericRepository<JobTitle> jobTitleRepository, IMapper mapper)
         {
             this.logger = logger;
             this.jobTitleRepository = jobTitleRepository;
@@ -94,9 +95,15 @@ namespace OrgManager.Services
         {
             try
             {
-                var jobTitle = mapper.Map<JobTitle>(jobTitleDto);
+                var jobTitle = await jobTitleRepository.GetByIdAsync(id);
+                if (jobTitle == null)
+                {
+                    return null;
+                }
 
-                var updatedJobTitle = await jobTitleRepository.UpdateAsync(id, jobTitle);
+                mapper.Map(jobTitleDto, jobTitle);
+
+                var updatedJobTitle = await jobTitleRepository.UpdateAsync(jobTitle);
 
                 return mapper.Map<JobTitleGetByIdResponse>(updatedJobTitle);
             }

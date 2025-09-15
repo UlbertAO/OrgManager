@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using OrgManager.Data.Repositories;
 using OrgManager.Data.Repositories.Interfaces;
 using OrgManager.DTOs.Department;
 using OrgManager.Entities;
@@ -8,10 +9,10 @@ namespace OrgManager.Services
     public class DepartmentService
     {
         private readonly ILogger<DepartmentService> logger;
-        private readonly IDepartmentRepository departmentRepository;
+        private readonly IGenericRepository<Department> departmentRepository;
         private readonly IMapper mapper;
 
-        public DepartmentService(ILogger<DepartmentService> logger, IDepartmentRepository departmentRepository, IMapper mapper)
+        public DepartmentService(ILogger<DepartmentService> logger, IGenericRepository<Department> departmentRepository, IMapper mapper)
         {
             this.logger = logger;
             this.departmentRepository = departmentRepository;
@@ -94,10 +95,15 @@ namespace OrgManager.Services
         {
             try
             {
-                var department = mapper.Map<Department>(departmentDto);
+                var department = await departmentRepository.GetByIdAsync(id);
+                if (department == null)
+                {
+                    return null;
+                }
+                mapper.Map(departmentDto, department);
 
-                var updatedDepartment = await departmentRepository.UpdateAsync(id, department);
-                
+                var updatedDepartment = await departmentRepository.UpdateAsync(department);
+
                 return mapper.Map<DepartmentGetByIdResponse>(updatedDepartment);
             }
             catch (Exception ex)
